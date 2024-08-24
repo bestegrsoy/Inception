@@ -11,3 +11,5 @@ https://gokhansengun.com/docker-compose-nasil-kullanilir/
 https://github.com/gkandemi/docker
 
 Hızlandırılmış Docker eğitimi: https://www.youtube.com/watch?v=ACr92yZF0bg
+
+Mysql komutları: https://mertcangokgoz.com/temel-mysql-komutlari/
