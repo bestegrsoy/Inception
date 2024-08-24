@@ -1,0 +1,255 @@
+Docker: Uygulamaları izole bir ortamda çalıştırmak için kullanılan bir platformdur. Bu platform, uygulamaların bağımlılıklarıyla birlikte paketlenmesini ve taşınmasını kolaylaştırır. Böylece, yazılımlar farklı ortamlarda sorunsuz bir şekilde çalışabilir.
+
+
+
+Container (Kapsayıcı): Docker tarafından oluşturulan, içinde bir uygulamanın ve bu uygulamanın çalışması için gerekli olan tüm bileşenlerin (kod, kütüphaneler, bağımlılıklar) bulunduğu hafif, taşınabilir ve izole bir çalışma ortamıdır. Kapsayıcılar, sanal makinelerden daha az kaynak kullanır ve daha hızlı başlatılabilir.
+
+
+
+Prosesler birbirinden bağımsız yönetiliyor. Ama konteyner mantığı, bu izolasyonu daha ileriye götürüyor. Bir prosese sanal (yavru) bir işletim sistemi sunuyor. Kernel(çekirdek) seviyesinde perdelemelerle proses kendini tek başına izole takıldığı bir işletim sistemi ortamında zannediyor.
+
+
+
+Bu tekniğin ilk örneği UNIX dünyasında 80'lerde başlıyor (chroot). Sonradan ganimetçilerin lideri Linux dünyasında bereketleniyor. Google tarafından 2006'da fişeklenen ve 2008'de de Linux çekirdeğine resmen eklenen "control groups” (cgroups) özelliği ile olgunlaşıyor. Cgroups, proseslerin kaynak kullanımlarını sınırlamayı sağlıyor ve güçlü yalıtım getiriyor.  
+
+
+
+Konteynerleştirme konteyner içine koyma anlamına gelir. Docker, Linux Kernel’e 2008 yılında eklenen Linux Containers (LXC) üzerine kurulu bir teknolojidir. LXC, Linux’da aynı işletim sistemi içerisinde birbirinden izole olmuş bir biçimde çalışan Container’lar (Linux tabanlı sistemler) sağlamaktadır. Anlaşıldığı üzere LXC, işletim sistemi seviyesinde bir sanallaştırma (virtualization) altyapısı sunmaktadır.
+
+
+
+Container’lar içerisinde aynı işletim sistemi tarafından çalıştırılan process’lere, LXC tarafından işletim sisteminde sadece kendileri koşuyormuş gibi düşünmeleri için bir sanallaştırma ortamı sağlanmıştır. LXC, Container’lara işletim sistemi tarafından sunulan dosya sistemi, ortam değişkenleri (Environment Variable), vb fonksiyonları her bir Container’a özgü olarak sağlar. Aynı işletim sistemi içerisinde çalışmalarına rağmen Container’lar birbirlerinden izole edilmişlerdir ve birbirleri ile istenmediği müddetçe iletişime geçemezler. İletişim kısıtlamasının bir amacı da Container’larının güvenliğini aynı Host üzerindeki diğer Container’lara karşı da korumaktır.
+
+
+
+VMware, Xen, Hyper-V gibi Hypervisor’ler (sanallaştırma platformları), yönettikleri fiziksel veya sanal bilgisayarlar üzerine farklı işletim sistemleri kurulmasına olanak tanımaktadırlar.LXC’nin Hypervisor’e göre sağladığı avantajların en önemlilerinden birisi aynı işletim sistemi içerisinde sunabilmesidir. Hypervisor bazlı sanal sunucuların hepsinin kendine ait Guest işletim sistemi bulundurması gereklidir, LXC’de ise Container’lar Host’un işletim sistemini kullanırlar yani bir işletim sistemini ortak olarak kullanırlar.
+
+
+
+Docker, LXC’nin zengin mirasının üzerine oturmuştur fakat LXC’de manuel olarak yapılan işlemleri ustaca paketleyerek standardize etmiştir. Docker, LXC’nin sunduğu kapsamlı fonksiyonları ve konfigürasyonları detaylarından arındırarak tabiri caizse halka indirgemiştir. Docker’ın getirdiği en önemli özellik Container’ın yapısını metin bazlı Image formatı ile tanımlamasıdır. Bu sayede aynı Image formatı kullanılarak aynı özellikteki Container’lar kolaylıkla yaratılabilir, başka kişilerle Docker Registry üzerinden paylaşılabilir ve kolaylıkla genişletilebilir.
+
+
+
+Ayrı ayrı Container’lar içinde çalıştırılan bileşenler (app server, web server, vb) gerektiği durumlarda teker teker genişletilebilir. Örneğin web server’ın istekleri karşılamada yetersiz olduğu görülürse web server Container’ından bir veya daha fazla ekstra Container yaratılarak gerekli işlem gücü diğer bileşenlerden (app server ve database server) bağımsız olarak sağlanmış olur. Eğer üç bileşeni aynı Container’a koysaydık ek web server isteğinde bu üç bileşeni birden içeren yeni bir Container’ı ayağa kaldırmak gerekecekti. Burada sadece web server’ın çalışması için gerekli konfigürasyon ve kod değişikliğinin yapılması gerekti. Bu yapı aslında gün geçtikçe daha da popüler hale gelen Microservices trendini de destekleyici bir özelliktir.Microservices’ler temellerini 1970’lerde Unix’ten “Do one thing and do it well” yani “Sadece bir şey yap ve iyi yap” olarak tercüme edilebilecek felsefeden almaktadır.
+
+
+
+*Docker Daemon Nedir?
+
+Docker daemon, dockerd adı verilen bir arka plan sürecidir. Bu süreç, Docker API’sini kullanarak Docker CLI (komut satırı arayüzü) veya diğer araçlar ile iletişim kurar. Docker daemon, Docker konteynerlerinin oluşturulması, çalıştırılması, durdurulması ve yönetilmesi gibi işlemleri gerçekleştirir.
+
+
+
+
+
+
+
+Terminoloji
+
+
+
+Container:
+
+Docker Daemon tarafından Linux çekirdeği içerisinde birbirinden izole olarak çalıştırılan process’lerin her birine verilen isimdir.
+
+
+
+Docker Image
+
+
+
+
+
+Tanım: Docker Image, uygulamanızın ve tüm bağımlılıklarının bir kopyasını içeren, çalıştırılabilir bir yazılım paketidir. Uygulamanızı herhangi bir sistemde çalıştırmak için gerekli olan her şeyi içerir.
+
+
+
+Kullanım: Docker Image, container oluşturmak için kullanılır. Bir Docker Image çalıştırıldığında, o imajdan bir container oluşturulur ve çalıştırılır.
+
+
+
+Özellikler: Sadece okunabilirler ve katmanlı dosya sistemi kullanırlar. Bu sayede, benzer imajlar arasında ortak dosyalar paylaşılabilir ve depolama verimliliği sağlanır.
+
+Dockerfile
+
+
+
+
+
+Tanım: Dockerfile, bir Docker Image oluşturmak için gereken talimatları içeren metin dosyasıdır. Dockerfile, imajın nasıl inşa edileceğini adım adım tanımlar.
+
+
+
+Kullanım: Dockerfile, docker build komutuyla çalıştırılarak bir Docker Image oluşturulur. Bu komut, Dockerfile'daki talimatları okuyarak bir imaj yaratır.
+
+
+
+Özellikler: Talimatlar genellikle işletim sistemi tabanını seçme (örn. FROM ubuntu), uygulama bağımlılıklarını yükleme, dosyaları kopyalama ve çalıştırma komutlarını içerir.
+
+
+
+Farkları
+
+
+
+
+
+Amacı: Docker Image, çalıştırılabilir bir uygulama ortamı sağlarken, Dockerfile bu imajı oluşturmak için gereken tarifleri içerir.
+
+
+
+Kullanım Yeri: Docker Image, doğrudan çalıştırılarak container oluşturulurken, Dockerfile bir imaj oluşturmak için docker build komutuyla kullanılır.
+
+
+
+Dosya Türü: Docker Image bir yazılım paketi iken, Dockerfile bir metin dosyasıdır.
+
+
+
+Image ve dockerfile : (kaynak kod)
+
+Docker Daemon ile çalıştırılacak Container’ların baz alacağı işletim sistemi veya başka Image’ı, dosya sisteminin yapısı ve içerisindeki dosyaları, koşturacağı programı (veya bazen çok tercih edilmemekle birlikte programları) belirleyen ve içeriği metin bazlı bir Dockerfile ile belirlenen binary’ye verilen isimdir.
+
+
+
+Hatırlarsanız Docker’ın doğuşunu anlattığımız ilk bölümde, Docker’ın oyunu değiştiren bir hamle yaparak LXC’ye göre fonksiyon kıstığını ve böylece başarılı olduğunu söylemiştik. İşte Docker, koşturulacak Container’ların iskeletini oluşturan her bir Image’ın bir Dockerfile ile tanımlanmasını gerekli kılar. Bu Dockerfile içerisinde Image’ın hangi Image’ı baz aldığı (miras aldığı), hangi dosyaları içerdiği ve hangi uygulamayı hangi parametrelerle koşturacağı açık açık verilir.
+
+
+
+Docker Daemon (Docker Engine)
+
+Docker ekosistemindeki Hypervisor’ün tam olarak karşılığıdır. Linux Kernel’inde bulunan LXC’nin yerini almıştır. İşlevi Container’ların birbirlerinden izole bir şekilde, Image’larda tanımlarının yapıldığı gibi çalışmaları için gerekli yardım ve yataklığı yani ortamı sağlamaktır. Container’ın bütün yaşam döngüsünü, dosya sistemini, verilen CPU ve RAM sınırlamaları ile çalışması vb bütün karmaşık (işletim sistemine yakın seviyelerdeki) işlerin halledildiği bölümdür.
+
+
+
+Docker CLI (Command-Line Interface) - Docker İstemcisi
+
+Docker CLI (Command-Line Interface), Docker ile etkileşimde bulunmak için kullanılan komut satırı aracıdır. Docker CLI, Docker motoruna komutlar göndermeyi ve container yönetimini sağlar.
+Docker'ın tüm işlevlerine erişim sağlar ve Docker ile çalışmayı oldukça kolaylaştırır. CLI, Docker ile ilgili tüm işlemleri hızlı ve verimli bir şekilde gerçekleştirmek için temel araçtır.
+
+
+
+Kullanıcının Docker Daemon ile konuşabilmesi için gerekli komut setini sağlar. Registry’den yeni bir Image indirilmesi, Image’dan yeni bir Container ayağa kaldırılması, çalışan Container’ın durdurulması, yeniden başlatılması, Container’lara işlemci ve RAM sınırlarının atanması vb komutların kullanıcıdan alınarak Docker Daemon’e teslim edilmesinden sorumludur.
+
+
+
+Docker Registry
+
+Docker Image'larını depolamak, yönetmek ve dağıtmak için kullanılan bir sunucudur. Registry, Docker Image'larının merkezi bir depoda tutulmasını sağlar ve bu imajların paylaşılarak kullanılabilir hale gelmesine olanak tanır.
+
+
+
+
+
+
+
+Docker Hub: En yaygın kullanılan genel Docker Registry'sidir.
+
+
+
+Özel Docker Registry: Şirketlerin veya bireylerin kendi ortamlarında çalıştırabilecekleri özel registry'lerdir. docker registry komutuyla özel bir registry kurmak mümkündür.
+
+
+
+Docker Repository
+
+Bir grup Image’ın oluşturduğu yapıdır. Bir repository’deki değişik Image’lar Tag’lanarak etiketlenir böylece değişik versiyonlar yönetilebilir. İlerleyen bölümlerde Image versiyonlama konusunda örnekler vereceğiz.
+
+
+
+
+
+
+
+docker run hello-world (bu girdiyi terminale yazdığımızda client ve server baslıkları altında veriler olan çıktılar aldık) komutunu verdiğimizde Daemon ilgili Image’dan yeni bir Container oluşturdu ve Container’ı çalıştırmaya başladı. Container da yukarıda okuduğumuz çıktıyı oluşturdu ve bu çıktı Daemon’dan Client’a gönderildi ve ekrana basıldı.
+
+Burada yavaş yavaş Docker gerçekleri ile yüzleşmeye başlıyoruz. Farklı bir açıdan bakarak olayı tekrar yorumlarsak aslında hello-world Image’ının tek işlevinin yukarıdaki Hello from Docker! ile başlayan çıktıyı oluşturmak olduğunu söyleyebiliriz. Bu Image tam olarak Docker’ın esansını (essence) ortaya koymaktadır. Her bir Image tek bir iş yapmak üzere hazırlanır, çalıştırıldığında o işi bir kere (hello-world Image’ının yaptığı gibi) ya da sürekli olarak (bir web sunucunun yapacağı gibi) yapar.
+
+
+
+
+
+Nginx Image’ını indirmek ve bu Image’dan Image içinde konfigüre edilmiş default web sitesini 8080 nolu portta sunmaya başlamak için docker run -p 8080:80 nginx:1.10 komutunu koşturun.
+
+Image’ın download edilmesi bittikten sonra tarayıcınızı açarak adres satırına http://localhost:8080 yazın. Aşağıdaki gibi bir ekran (Nginx test sayfası) görmelisiniz.
+
+
+
+-p 8080:80 -p parametresi kendisinden sonra verilen parametredeki portlar arasında port forwarding yani port yönlendirme yapar. İlk verilen port, örneğimizde 8080, host üzerindeki portu ikinci verilen port, örneğimizde 80, Container üzerindeki portu temsil eder. Yukarıdaki komutta Docker Daemon’e Host’un 8080 numaralı portuna gelen isteklerin Container’ın 80 numaralı portuna göndermesini ifade ettik. Burada Host tahmin ettiğiniz gibi Docker komutlarını koşturduğumuz bilgisayarımız Container ise yeni oluşturduğumuz Nginx Container’ıdır.
+
+
+
+Yani Nginx Container’ına 80 numaralı port’u dinlemesi gerektiğini kim söyledi ve 80 numaralı port’a gelen request’lerde test sayfasını göndermesini kim salık verdi?
+
+İşte Docker mucizesi yine tam da burada karşımıza çıkmaktadır. Official Nginx Image’ını hazırlayan arkadaşlar Nginx’i default olarak 80 numaralı portu dinlemeye ve bu porta gelen web isteklerini test web sitesine yönlendirmeye dolayısıyla da test ana sayfasını sunmak üzere ayarlamıştır. Dolayısıyla Nginx Image’ından oluşturulan Container’ın yegane amacı budur. Bu Nginx Image’ı başka bir görevi, daha anlamlı olarak kendi web sitemizi, sunmak üzere ayarlanabilir.
+
+
+
+docker exec -it <container_id> /bin/bash komutu ile Container’a bir Bash Shell açabiliriz. -i interaktif terminali -t ise terminalin attach olmasını istediğimizi belirtir. docker exec -it <container_id> /bin/bash komutunu çalıştırın (Container ID’nin sadece baştan birkaç harfini vermemizin yettiğine -çakışma olmadığı müddetçe- dikkat edin). Aşağıdakine benzer bir görüntü elde edeceksiniz. Prompt’un nasıl değiştiğine ve Container ID’yi içerdiğine dikkat edin.
+
+
+
+beste@linux:~$ docker exec -it 829 /bin/bash //829
+
+root@8294e86f7e65:/# //Kullanıcı root oldu bilgisayar adı da Container ID oldu
+
+
+
+Container’ın Bash’inde iken ps -ef komutunu verin ve Container içinde çalışan bütün process’leri listeleyin. Bende oluşan çıktı aşağıda.
+
+
+
+root@54bad6cec3c4:/# ps -ef
+ UID        PID  PPID  C STIME TTY          TIME CMD
+ root         1     0  0 00:06 ?        00:00:00 nginx: master process nginx -g daemon off;
+ nginx        6     1  0 00:06 ?        00:00:00 nginx: worker process
+ root         7     0  0 00:07 ?        00:00:00 /bin/bash
+ root        14     7  0 00:13 ?        00:00:00 ps -ef    
+
+
+
+Gördüğünüz gibi Container tam olarak nginx -g daemon off ile çalıştırılmış dolayısıyla bir konfigürasyon dosyası verilmemiş. more /etc/nginx/nginx.conf komutunun çıktısından başka bir konfigürasyon dosyasının (more /etc/nginx/conf.d/default.conf) eklendiğini göreceksiniz. Bu konfigürasyon dosyasının içeriğine baktığınızda sunucunun localhost üzerinde 80 nolu portu dinlediği, root dizin olarak kendisine /usr/share/nginx/html klasörünü aldığını ve index dosyası olarak index.html ve index.htm dosyalarını sunmak üzere ayarlandığını görebilirsiniz.
+
+
+
+Son olarak isterseniz more /usr/share/nginx/html/index.html komutu ile tarayıcıdan gördüğümüz sayfanın kaynak koduna erişebilirsiniz.
+
+
+
+Nginx Container’ı terminal’e Attached bir şekilde ayağa kalktı. Bu çoğu zaman istenen durum değildir. -d parametresi ile Container’ı Detached modda çalıştırabilir ve terminali bloklanmaktan kurtarabiliriz. Detached modda çalışan Container’ların ID’lerini docker ps komutu ile elde edebilir, docker kill <container_id> komutu ile de Container’ı acil çıkışa zorlayabiliriz.
+
+
+
+
+
+Benim Makinemde Çalışıyor (Works on my Machine) Problemine Çözüm Sağlaması
+
+
+
+PROD ortamında Docker Container’da operasyon sırasında yapılmış bir değişiklik kolaylıkla geliştiricinin bilgisayarına yeni bir Image olarak getirebilir ve eğer oluşan problem ilgili değişiklerden kaynaklı ise geliştirici ortamında kolaylıkla tekrarlanabilir hale getirilir.
+
+
+
+
+
+
+
+docker cheat sheet için(sayfanın sonunda), https://gokhansengun.com/docker-nedir-nasil-calisir-nerede-kullanilir/
+
+
+
+
+
+Kaynaklar:
+
+https://gokhansengun.com/docker-nedir-nasil-calisir-nerede-kullanilir/
+
+chatgpt.com
+
+https://github.com/gkandemi/docker
+
+
+
+
+
+

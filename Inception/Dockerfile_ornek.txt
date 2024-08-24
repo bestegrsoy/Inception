@@ -1,0 +1,253 @@
+Örnek bir Dockerfile adım adım ne yapıyor:
+
+FROM debian:bullseye
+
+
+
+RUN apt-get update && apt-get install -y php-fpm php-mysql sendmail wget
+
+
+
+RUN wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
+
+&& chmod +x wp-cli.phar \
+
+&& mv wp-cli.phar /usr/local/bin/wp-cli
+
+
+
+EXPOSE 9000
+
+
+
+COPY ./conf/www.conf /etc/php/7.4/fpm/pool.d/
+
+
+
+COPY ./tools/wp.sh /
+
+
+
+RUN chmod +x /wp.sh
+
+
+
+ENTRYPOINT [ "/wp.sh" ]
+
+
+
+CMD [ "/usr/sbin/php-fpm7.4", "--nodaemonize" ]
+
+
+
+Bu Dockerfile, Debian Bullseye tabanlı bir konteyner oluşturmak ve içerisinde PHP-FPM ile WordPress Komut Satırı Arayüzü'nü (WP-CLI) çalıştırmak için kullanılır.
+
+
+
+RUN apt-get update && apt-get install -y php-fpm php-mysql sendmail wget
+
+
+
+Bu komut, temel imajın üzerine PHP-FPM, PHP-MySQL, Sendmail ve Wget paketlerini kurar.
+
+
+
+
+
+apt-get update: Paket listesini günceller. Bu, Debian paket deposundan en güncel bilgileri almak için yapılır.
+
+
+
+apt-get install -y: Belirtilen paketleri -y seçeneği ile kullanıcı etkileşimi olmadan otomatik olarak kurar.
+
+
+
+
+
+php-fpm: PHP-FPM (FastCGI Process Manager) PHP'nin daha yüksek performansla çalışmasını sağlar. Web sunucusundan gelen PHP isteklerini işleyen bir PHP çözümüdür.
+
+
+
+php-mysql: PHP'nin MySQL veritabanı ile etkileşime geçmesini sağlayan bir uzantıdır.
+
+
+
+sendmail: E-posta gönderme fonksiyonlarını desteklemek için kullanılır. PHP uygulamalarında mail() fonksiyonu gibi e-posta göndermek için bu paket gereklidir.
+
+
+
+wget: Dosya indirmek için kullanılan bir komut satırı aracıdır. WP-CLI'yi indirmek için kullanacağız.
+
+
+
+3. WP-CLI'nin Kurulumu
+
+RUN wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
+
+&& chmod +x wp-cli.phar \
+
+&& mv wp-cli.phar /usr/local/bin/wp-cli
+
+
+
+Bu adımda, WP-CLI (WordPress Komut Satırı Arayüzü) kurulumu gerçekleştirilir. WP-CLI, WordPress sitelerini komut satırından yönetmeyi sağlayan güçlü bir araçtır.
+
+
+
+
+
+wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar:
+
+
+
+
+
+Bu komut, WP-CLI'nin en güncel versiyonunu wp-cli.phar adıyla indirir. wget komutu bu amaçla kullanılır.
+
+
+
+chmod +x wp-cli.phar:
+
+
+
+
+
+İndirilen wp-cli.phar dosyasına yürütülebilir (executable) izin verilir. Bu, komutun çalıştırılabilmesi için gereklidir.
+
+
+
+mv wp-cli.phar /usr/local/bin/wp-cli:
+
+
+
+
+
+wp-cli.phar dosyasını /usr/local/bin/ dizinine taşır ve ismini wp-cli olarak değiştirir.
+
+
+
+Bu dizin, sistemin PATH değişkenine dahil olduğu için wp-cli komutu her yerden erişilebilir hale gelir.
+
+
+
+EXPOSE 9000:
+
+
+
+
+
+Bu komut, konteynerin dış dünya ile iletişim kurabilmesi için 9000 portunu açar. PHP-FPM, varsayılan olarak bu port üzerinden çalışır ve gelen istekleri bu port üzerinden alır.
+
+
+
+9000 portu, PHP-FPM için yaygın olarak kullanılan bir varsayılan porttur. PHP-FPM, bir FastCGI sunucusu olarak çalıştığı için, gelen PHP isteklerini bu port üzerinden alır ve işler.
+
+
+
+Bu port, aynı Docker ağı içindeki diğer konteynerlar tarafından erişilebilir olur. Ancak, konteynerın dış dünya ile doğrudan iletişime geçmesi için portun ayrıca yönlendirilmesi gerekir.
+
+
+
+Yapılandırma Dosyalarının Kopyalanması
+
+COPY ./conf/www.conf /etc/php/7.4/fpm/pool.d/
+
+COPY ./tools/wp.sh /
+
+
+
+
+
+
+
+COPY ./conf/www.conf /etc/php/7.4/fpm/pool.d/:
+
+
+
+
+
+Bu komut, www.conf dosyasını yerel makineden konteyner içindeki /etc/php/7.4/fpm/pool.d/ dizinine kopyalar.
+
+
+
+www.conf dosyası, PHP-FPM için havuz yapılandırma dosyasıdır ve PHP süreçlerinin nasıl yönetileceğini belirler. Bu dosya, özellikle PHP-FPM'nin belirli ayarlarını yapılandırmak için kullanılır.
+
+
+
+COPY ./tools/wp.sh /:
+
+
+
+
+
+Bu komut, wp.sh adlı betik dosyasını yerel makineden konteynerin kök dizinine kopyalar. Bu betik, konteynerin başlatıldığında çalıştıracağı görevleri tanımlar.
+
+
+
+Yürütme İzinlerinin Verilmesi
+
+RUN chmod +x /wp.sh
+
+
+
+
+
+Bu komut, wp.sh betik dosyasına yürütme izni verir. Bu izin, betiğin konteyner başlatıldığında çalıştırılabilmesi için gereklidir.
+
+
+
+Giriş Noktası ve Komutun Tanımlanması
+
+ENTRYPOINT [ "/wp.sh" ]
+
+CMD [ "/usr/sbin/php-fpm7.4", "--nodaemonize" ]
+
+
+
+
+
+
+
+ENTRYPOINT [ "/wp.sh" ]:
+
+
+
+
+
+Bu komut, konteyner başlatıldığında ilk çalıştırılacak komut veya betiği belirtir. Burada, wp.sh betiği giriş noktası olarak ayarlanmıştır. Bu betik, genellikle WordPress kurulumu, ayarların yapılması veya belirli bir işlevin otomatik olarak yerine getirilmesi için kullanılır.
+
+
+
+CMD [ "/usr/sbin/php-fpm7.4", "--nodaemonize" ]:
+
+
+
+
+
+Bu komut, ENTRYPOINT komutu çalıştıktan sonra çalışacak varsayılan komutu belirtir.
+
+
+
+CMD [ "/usr/sbin/php-fpm7.4", "--nodaemonize" ]Bu, PHP-FPM'yi başlatan komuttur ve PHP-FPM'nin 7.4 sürümünü çalıştırır.
+
+
+
+Burada PHP-FPM --nodaemonize parametresi ile başlatılır. --nodaemonize seçeneği, PHP-FPM'nin arka planda (daemon olarak) çalışmasını engeller ve çıktılar doğrudan konteynerin standart çıktısına (stdout) yazılır. Bu, Docker konteynerinin başlatıldığında kesintisiz bir şekilde çalışmasını sağlar.
+
+
+
+
+
+
+
+MariaDB: Açık kaynaklı bir veritabanı yönetim sistemidir (DBMS). MySQL'in bir çatallaması (fork) olarak geliştirilmiştir. Veritabanları oluşturmak, yönetmek ve veri saklamak için kullanılır. Özellikle yüksek performans, güvenlik ve esneklik sunar. SQL dilini kullanarak veritabanı işlemleri yapılabilir.
+
+
+
+Nginx: Yüksek performanslı bir web sunucusu ve ters proxy sunucusudur. HTTP, HTTPS, SMTP, POP3 ve IMAP protokollerini destekler. Nginx, statik içerikleri hızlı bir şekilde sunma ve yük dengeleme (load balancing) yapma gibi özellikleriyle bilinir. Genellikle yüksek trafik alan web siteleri için tercih edilir çünkü verimli kaynak kullanımı ve düşük bellek tüketimi ile tanınır.
+
+
+
+CMD [ "nginx", "-g", "daemon off;" ]
+
+Nginx’i foreground modda (arka planda değil, önde çalışacak şekilde) çalıştırmak için gerekli komutları belirtir. Bu, nginx komutunun -g argümanı ile birlikte daemon off opsiyonunu kullanarak Nginx’in arka planda bir işlem olarak değil, ön planda çalışmasını sağlar. Bu şekilde konteyner açık kalır ve kapanmaz, çünkü foreground modda çalışan bir işlem olduğu sürece konteyner çalışmaya devam eder.

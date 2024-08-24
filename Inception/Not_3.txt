@@ -1,0 +1,12 @@
+Docker Compose Nedir?
+
+Docker Compose, birden fazla Docker konteynerinin yönetimini kolaylaştıran bir araçtır. Docker Compose, tek bir yapılandırma dosyasında birden çok Docker konteynerini tanımlayarak, bu konteynerlerin birlikte çalışması ve koordinasyonu için gerekli olan ağ, depolama, ortam değişkenleri gibi kaynakları ayarlayabilir.
+
+
+Docker Compose, konteynerleri birlikte çalıştırmak ve konuşlandırmak için daha az kod yazmanıza olanak tanır. Bununla birlikte, birden çok konteyneri birlikte çalıştırırken, bunların arasındaki bağımlılıkları yönetmenize yardımcı olur. Örneğin; bir web uygulaması için, bir web sunucusu, bir veritabanı sunucusu ve bir önbellek sunucusu gibi birkaç farklı konteyner gerekebilir. Docker Compose, bu konteynerlerin birlikte çalışması için gerekli olan ağ, ortam değişkenleri, bağımlılık sıralaması gibi ayarları otomatik olarak yapabilir.
+
+
+Docker Compose dosyası YAML formatındadır ve kullanımı kolaydır. Bu nedenle, Docker Compose, karmaşık uygulamaların hızlı bir şekilde hazırlanmasına ve dağıtılmasına olanak tanır.
+
+
+docker-compose detaylarına inmek için https://gokhansengun.com/docker-compose-nasil-kullanilir/
